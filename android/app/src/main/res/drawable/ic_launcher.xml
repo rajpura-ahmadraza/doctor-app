@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="192dp"
+    android:height="192dp"
+    android:viewportWidth="192"
+    android:viewportHeight="192">
+    <!-- Purple background -->
+    <path
+        android:fillColor="#8C8AF8"
+        android:pathData="M0,0 L192,0 L192,192 L0,192 Z" />
+    <!-- Simple medical cross icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M96,40 L96,152 M40,96 L152,96 M80,60 L112,60 L112,92 L152,92 L152,100 L112,100 L112,132 L80,132 L80,100 L40,100 L40,92 L80,92 Z" />
+</vector>
