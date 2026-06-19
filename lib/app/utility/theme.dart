@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 // ── ClinixPro brand colors ──────────────────────────────────────
-const primary   = Color(0xFF8C8AF8);
-const primary2  = Color(0xFF4D60D6);
-const orange    = Color(0xFFE6AC41);
-const dark      = Color(0xFF000000);
-const light     = Color(0xFFFFFFFF);
-const black200  = Color(0xFFDFDFE3);
-const black100  = Color(0xFFD9D9D9);
-const black300  = Color(0xFFF5F5F5);
-const dark500   = Color(0x80000000);
-const errorCol  = Color(0xFFFF0000);
-const success   = Color(0xFF23AA49);
+const primary = Color(0xFF8C8AF8);
+const primary2 = Color(0xFF4D60D6);
+const orange = Color(0xFFE6AC41);
+const dark = Color(0xFF000000);
+const light = Color(0xFFFFFFFF);
+const black200 = Color(0xFFDFDFE3);
+const black100 = Color(0xFFD9D9D9);
+const black300 = Color(0xFFF5F5F5);
+const dark500 = Color(0x80000000);
+const errorCol = Color(0xFFFF0000);
+const success = Color(0xFF23AA49);
 
 const bgGradient = LinearGradient(
   begin: Alignment.topRight,
@@ -22,13 +23,45 @@ const bgGradient = LinearGradient(
 
 // ── Text styles ─────────────────────────────────────────────────
 class TStyle {
-  static const h1 = TextStyle(fontFamily: 'HankenGrotesk', fontSize: 22, fontWeight: FontWeight.w700, color: dark);
-  static const h2 = TextStyle(fontFamily: 'HankenGrotesk', fontSize: 18, fontWeight: FontWeight.w600, color: dark);
-  static const h3 = TextStyle(fontFamily: 'HankenGrotesk', fontSize: 15, fontWeight: FontWeight.w600, color: dark);
-  static const body = TextStyle(fontFamily: 'HankenGrotesk', fontSize: 13, color: dark);
-  static const bodyMuted = TextStyle(fontFamily: 'HankenGrotesk', fontSize: 13, color: dark500);
-  static const small = TextStyle(fontFamily: 'HankenGrotesk', fontSize: 11, color: dark500);
-  static const label = TextStyle(fontFamily: 'HankenGrotesk', fontSize: 12, fontWeight: FontWeight.w500, color: dark);
+  static TextStyle get h1 => TextStyle(
+    fontFamily: 'HankenGrotesk',
+    fontSize: Get.height / 34.36,
+    fontWeight: FontWeight.w700,
+    color: dark,
+  );
+  static const h2 = TextStyle(
+    fontFamily: 'HankenGrotesk',
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    color: dark,
+  );
+  static const h3 = TextStyle(
+    fontFamily: 'HankenGrotesk',
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+    color: dark,
+  );
+  static const body = TextStyle(
+    fontFamily: 'HankenGrotesk',
+    fontSize: 13,
+    color: dark,
+  );
+  static const bodyMuted = TextStyle(
+    fontFamily: 'HankenGrotesk',
+    fontSize: 13,
+    color: dark500,
+  );
+  static const small = TextStyle(
+    fontFamily: 'HankenGrotesk',
+    fontSize: 11,
+    color: dark500,
+  );
+  static const label = TextStyle(
+    fontFamily: 'HankenGrotesk',
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    color: dark,
+  );
 }
 
 // ── Shared widgets ───────────────────────────────────────────────
@@ -100,7 +133,9 @@ class PrimaryBtn extends StatelessWidget {
             ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: light, strokeWidth: 2))
             : Row(mainAxisSize: MainAxisSize.min, children: [
                 if (icon != null) ...[Icon(icon, size: 18), const SizedBox(width: 8)],
-                Text(label, style: const TextStyle(fontFamily: 'HankenGrotesk', fontSize: 15, fontWeight: FontWeight.w600, color: light)),
+                Text(label,
+                    style: const TextStyle(
+                        fontFamily: 'HankenGrotesk', fontSize: 15, fontWeight: FontWeight.w600, color: light)),
               ]),
       ),
     );
@@ -117,7 +152,16 @@ class AppInput extends StatelessWidget {
   final TextInputType? keyboardType;
   final int maxLines;
   final String? label;
-  const AppInput({super.key, required this.hint, this.controller, this.obscure = false, this.suffix, this.prefix, this.keyboardType, this.maxLines = 1, this.label});
+  const AppInput(
+      {super.key,
+      required this.hint,
+      this.controller,
+      this.obscure = false,
+      this.suffix,
+      this.prefix,
+      this.keyboardType,
+      this.maxLines = 1,
+      this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +213,11 @@ class SectionHeader extends StatelessWidget {
       if (action != null)
         TextButton(
           onPressed: onAction,
-          style: TextButton.styleFrom(foregroundColor: primary, padding: EdgeInsets.zero, minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          style: TextButton.styleFrom(
+              foregroundColor: primary,
+              padding: EdgeInsets.zero,
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap),
           child: Text(action!, style: const TextStyle(fontFamily: 'HankenGrotesk', fontSize: 12, color: primary)),
         ),
     ]);
@@ -188,7 +236,8 @@ class StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Text(label, style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 10, fontWeight: FontWeight.w600, color: fg)),
+      child: Text(label,
+          style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 10, fontWeight: FontWeight.w600, color: fg)),
     );
   }
 }

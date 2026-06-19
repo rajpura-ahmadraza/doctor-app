@@ -8,7 +8,12 @@ class AppointmentController extends GetxController {
   final selectedPayment = 'upi'.obs;
   final booking = false.obs;
 
-  final types = ['Follow-up', 'New Consultation', 'Routine Check-up', 'Emergency'];
+  final types = [
+    'Follow-up',
+    'New Consultation',
+    'Routine Check-up',
+    'Emergency',
+  ];
 
   void selectDate(DateTime date) {
     selectedDate.value = date;

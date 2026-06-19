@@ -28,255 +28,583 @@ class _AppointmentScreenState extends State<AppointmentScreen> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
+    // Inject AppointmentController
     final controller = Get.put(AppointmentController());
 
     return AppScaffold(
       body: SafeArea(
-        child: Column(children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-            child: GlassCard(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              child: Row(children: [
-                IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18)),
-                const SizedBox(width: 4),
-                Text('Appointments', style: TStyle.h3),
-              ]),
+        child: Column(
+          children: [
+            // 1. Custom Header Widget
+            const AppointmentHeaderWidget(),
+            SizedBox(
+              height: Get.height / 75.6,
             ),
-          ),
-          const SizedBox(height: 10),
 
-          // Tabs
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: GlassCard(
-              padding: const EdgeInsets.all(4),
-              child: TabBar(
+            // 2. Tab Bar Selector
+            AppointmentTabsWidget(tabController: _tab),
+            SizedBox(
+              height: Get.height / 75.6,
+            ),
+
+            // 3. Tab Body
+            Expanded(
+              child: TabBarView(
                 controller: _tab,
-                labelStyle: const TextStyle(fontFamily: 'HankenGrotesk', fontSize: 13, fontWeight: FontWeight.w600),
-                unselectedLabelStyle: const TextStyle(fontFamily: 'HankenGrotesk', fontSize: 13),
-                labelColor: light, unselectedLabelColor: dark500,
-                indicator: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(12)),
-                indicatorSize: TabBarIndicatorSize.tab,
-                dividerColor: Colors.transparent,
-                tabs: const [Tab(text: 'Book New'), Tab(text: 'My Appointments')],
+                children: [
+                  AppointmentBookingTabWidget(
+                    controller: controller,
+                    parentContext: context,
+                  ),
+                  AppointmentHistoryTabWidget(
+                    parentContext: context,
+                  ),
+                ],
               ),
             ),
-          ),
-          const SizedBox(height: 10),
-
-          Expanded(
-            child: TabBarView(
-              controller: _tab,
-              children: [_bookingTab(controller), _historyTab()],
-            ),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }
+}
 
-  // ── Booking tab ──
-  Widget _bookingTab(AppointmentController controller) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // Doctor info
-        GlassCard(child: Row(children: [
-          Container(
-            width: 50, height: 50,
-            decoration: BoxDecoration(color: primary.withValues(alpha: .15), shape: BoxShape.circle),
-            child: const Center(child: Text('P', style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 20, fontWeight: FontWeight.w700, color: primary))),
-          ),
-          const SizedBox(width: 12),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Dr. Priya Sharma', style: TStyle.h3),
-            Text('MBBS, MD • ClinixPro Clinic', style: TStyle.small),
-            const SizedBox(height: 4),
-            Row(children: [
-              const Icon(Icons.star_rounded, color: Color(0xFFFFB300), size: 14),
-              const SizedBox(width: 4),
-              Text('4.9 • 200+ patients', style: TStyle.small),
-            ]),
-          ])),
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            const Text('₹500', style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 16, fontWeight: FontWeight.w700, color: dark)),
-            Text('per visit', style: TStyle.small),
-          ]),
-        ])),
-        const SizedBox(height: 14),
+// ── Appointment Header Widget ───────────────────────────────────
+class AppointmentHeaderWidget extends StatelessWidget {
+  const AppointmentHeaderWidget({super.key});
 
-        // Visit type
-        Text('Visit type', style: TStyle.h3),
-        const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(children: controller.types.map((t) => GestureDetector(
-            onTap: () => controller.selectType(t),
-            child: Obx(() {
-              final isSelected = controller.selectedType.value == t;
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected ? primary : light,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: isSelected ? primary : black200),
-                ),
-                child: Text(t, style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 12, fontWeight: FontWeight.w500, color: isSelected ? light : dark)),
-              );
-            }),
-          )).toList()),
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        Get.height / 47.25,
+        Get.height / 63,
+        Get.height / 47.25,
+        0,
+      ),
+      child: GlassCard(
+        padding: EdgeInsets.symmetric(
+          horizontal: Get.height / 50.4,
+          vertical: Get.height / 63,
         ),
-        const SizedBox(height: 16),
+        child: Row(
+          children: [
+            Text(
+              'Appointments',
+              style: TextStyle(
+                fontFamily: 'KronaOne',
+                fontSize: Get.height / 47.25,
+                color: dark,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-        // Date picker
-        Text('Select date', style: TStyle.h3),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 80,
-          child: ListView.builder(
+// ── Appointment Tabs Widget ─────────────────────────────────────
+class AppointmentTabsWidget extends StatelessWidget {
+  final TabController tabController;
+
+  const AppointmentTabsWidget({
+    super.key,
+    required this.tabController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: Get.height / 47.25,
+      ),
+      child: GlassCard(
+        padding: EdgeInsets.all(
+          Get.height / 189,
+        ),
+        child: TabBar(
+          controller: tabController,
+          labelStyle: TextStyle(
+            fontFamily: 'HankenGrotesk',
+            fontSize: Get.height / 58.15,
+            fontWeight: FontWeight.w600,
+          ),
+          unselectedLabelStyle: TextStyle(
+            fontFamily: 'HankenGrotesk',
+            fontSize: Get.height / 58.15,
+          ),
+          labelColor: light,
+          unselectedLabelColor: dark500,
+          indicator: BoxDecoration(
+            color: primary,
+            borderRadius: BorderRadius.circular(
+              Get.height / 63,
+            ),
+          ),
+          indicatorSize: TabBarIndicatorSize.tab,
+          dividerColor: Colors.transparent,
+          tabs: const [
+            Tab(text: 'Book New'),
+            Tab(
+              text: 'My Appointments',
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Appointment Booking Flow Tab Widget ─────────────────────────
+class AppointmentBookingTabWidget extends StatelessWidget {
+  final AppointmentController controller;
+  final BuildContext parentContext;
+
+  const AppointmentBookingTabWidget({
+    super.key,
+    required this.controller,
+    required this.parentContext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        Get.height / 47.25,
+        0,
+        Get.height / 47.25,
+        Get.height / 31.5,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Doctor Branding Info Card
+          GlassCard(
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: Get.height / 30.24,
+                  backgroundColor: const Color(0xFFECEBFF),
+                  child: Center(
+                    child: Text(
+                      'P',
+                      style: TextStyle(
+                        fontFamily: 'HankenGrotesk',
+                        fontSize: Get.height / 37.8,
+                        fontWeight: FontWeight.w700,
+                        color: primary,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: Get.height / 63,
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Dr. Priya Sharma',
+                        style: TStyle.h3,
+                      ),
+                      const Text(
+                        'MBBS, MD • ClinixPro Clinic',
+                        style: TStyle.small,
+                      ),
+                      SizedBox(
+                        height: Get.height / 189,
+                      ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.star_rounded,
+                            color: const Color(0xFFFFB300),
+                            size: Get.height / 54,
+                          ),
+                          SizedBox(
+                            width: Get.height / 189,
+                          ),
+                          const Text(
+                            '4.9 • 200+ patients',
+                            style: TStyle.small,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '₹500',
+                      style: TextStyle(
+                        fontFamily: 'HankenGrotesk',
+                        fontSize: Get.height / 47.25,
+                        fontWeight: FontWeight.w700,
+                        color: dark,
+                      ),
+                    ),
+                    const Text(
+                      'per visit',
+                      style: TStyle.small,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: Get.height / 54,
+          ),
+
+          // Visit type selector
+          const Text(
+            'Visit type',
+            style: TStyle.h3,
+          ),
+          SizedBox(
+            height: Get.height / 94.5,
+          ),
+          SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            itemCount: 14,
+            child: Row(
+              children: controller.types.map((t) {
+                return GestureDetector(
+                  onTap: () => controller.selectType(t),
+                  child: Obx(() {
+                    final isSelected = controller.selectedType.value == t;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      margin: EdgeInsets.only(
+                        right: Get.height / 94.5,
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: Get.height / 54,
+                        vertical: Get.height / 94.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected ? primary : light,
+                        borderRadius: BorderRadius.circular(
+                          Get.height / 37.8,
+                        ),
+                        border: Border.all(
+                          color: isSelected ? primary : black200,
+                        ),
+                      ),
+                      child: Text(
+                        t,
+                        style: TextStyle(
+                          fontFamily: 'HankenGrotesk',
+                          fontSize: Get.height / 63,
+                          fontWeight: FontWeight.w500,
+                          color: isSelected ? light : dark,
+                        ),
+                      ),
+                    );
+                  }),
+                );
+              }).toList(),
+            ),
+          ),
+          SizedBox(
+            height: Get.height / 47.25,
+          ),
+
+          // Date picker list
+          const Text(
+            'Select date',
+            style: TStyle.h3,
+          ),
+          SizedBox(
+            height: Get.height / 94.5,
+          ),
+          SizedBox(
+            height: 80,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 14,
+              itemBuilder: (_, i) {
+                final date = DateTime.now().add(Duration(days: i + 1));
+                final isWeekend = date.weekday == DateTime.sunday;
+                return GestureDetector(
+                  onTap: isWeekend ? null : () => controller.selectDate(date),
+                  child: Obx(() {
+                    final isSelected = DateFormat('yyyyMMdd').format(date) ==
+                        DateFormat('yyyyMMdd').format(controller.selectedDate.value);
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      width: 58,
+                      margin: const EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        color: isWeekend
+                            ? black300
+                            : isSelected
+                                ? primary
+                                : light,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: isSelected ? primary : black200),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            DateFormat('EEE').format(date),
+                            style: TextStyle(
+                              fontFamily: 'HankenGrotesk',
+                              fontSize: 10,
+                              color: isWeekend
+                                  ? dark500
+                                  : isSelected
+                                      ? light
+                                      : dark500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            DateFormat('d').format(date),
+                            style: TextStyle(
+                              fontFamily: 'HankenGrotesk',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: isWeekend
+                                  ? dark500
+                                  : isSelected
+                                      ? light
+                                      : dark,
+                            ),
+                          ),
+                          Text(
+                            DateFormat('MMM').format(date),
+                            style: TextStyle(
+                              fontFamily: 'HankenGrotesk',
+                              fontSize: 10,
+                              color: isWeekend
+                                  ? dark500
+                                  : isSelected
+                                      ? light.withValues(alpha: .8)
+                                      : dark500,
+                            ),
+                          ),
+                          if (isWeekend)
+                            const Text('Closed',
+                                style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 8, color: dark500)),
+                        ],
+                      ),
+                    );
+                  }),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Time Slots selection grid
+          const Text('Select time slot', style: TStyle.h3),
+          const SizedBox(height: 8),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 2.5,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: PatientData.timeSlots.length,
             itemBuilder: (_, i) {
-              final date = DateTime.now().add(Duration(days: i + 1));
-              final isWeekend = date.weekday == DateTime.sunday;
+              final slot = PatientData.timeSlots[i];
+              final available = slot['available'] as bool;
               return GestureDetector(
-                onTap: isWeekend ? null : () => controller.selectDate(date),
+                onTap: available ? () => controller.selectSlot(slot['time']!) : null,
                 child: Obx(() {
-                  final isSelected = DateFormat('yyyyMMdd').format(date) == DateFormat('yyyyMMdd').format(controller.selectedDate.value);
+                  final isSelected = controller.selectedSlot.value == slot['time'];
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
-                    width: 58,
-                    margin: const EdgeInsets.only(right: 8),
                     decoration: BoxDecoration(
-                      color: isWeekend ? black300 : isSelected ? primary : light,
-                      borderRadius: BorderRadius.circular(14),
+                      color: !available
+                          ? black300
+                          : isSelected
+                              ? primary
+                              : light,
+                      borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: isSelected ? primary : black200),
                     ),
-                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      Text(DateFormat('EEE').format(date), style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 10, color: isWeekend ? dark500 : isSelected ? light : dark500)),
-                      const SizedBox(height: 4),
-                      Text(DateFormat('d').format(date), style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 18, fontWeight: FontWeight.w700, color: isWeekend ? dark500 : isSelected ? light : dark)),
-                      Text(DateFormat('MMM').format(date), style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 10, color: isWeekend ? dark500 : isSelected ? light.withValues(alpha: .8) : dark500)),
-                      if (isWeekend) Text('Closed', style: const TextStyle(fontFamily: 'HankenGrotesk', fontSize: 8, color: dark500)),
-                    ]),
+                    child: Center(
+                      child: Text(
+                        slot['time']!,
+                        style: TextStyle(
+                          fontFamily: 'HankenGrotesk',
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: !available
+                              ? dark500
+                              : isSelected
+                                  ? light
+                                  : dark,
+                        ),
+                      ),
+                    ),
                   );
                 }),
               );
             },
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-        // Time slots
-        Text('Select time slot', style: TStyle.h3),
-        const SizedBox(height: 8),
-        GridView.builder(
-          shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, childAspectRatio: 2.5, crossAxisSpacing: 8, mainAxisSpacing: 8),
-          itemCount: PatientData.timeSlots.length,
-          itemBuilder: (_, i) {
-            final slot = PatientData.timeSlots[i];
-            final available = slot['available'] as bool;
+          // Payment Methods list options
+          const Text('Payment method', style: TStyle.h3),
+          const SizedBox(height: 8),
+          ...[
+            ('upi', Icons.account_balance_wallet_outlined, 'UPI', 'GPay, PhonePe, Paytm'),
+            ('card', Icons.credit_card_outlined, 'Card', 'Credit / Debit card'),
+            ('cash', Icons.money_outlined, 'Pay at clinic', 'Pay when you visit'),
+          ].map((p) {
             return GestureDetector(
-              onTap: available ? () => controller.selectSlot(slot['time']!) : null,
+              onTap: () => controller.selectPayment(p.$1),
               child: Obx(() {
-                final isSelected = controller.selectedSlot.value == slot['time'];
+                final isSelected = controller.selectedPayment.value == p.$1;
                 return AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: !available ? black300 : isSelected ? primary : light,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: isSelected ? primary : black200),
+                    color: isSelected ? primary.withValues(alpha: .08) : light,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: isSelected ? primary : black200, width: isSelected ? 1.5 : 1),
                   ),
-                  child: Center(child: Text(
-                    slot['time']!,
-                    style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 11, fontWeight: FontWeight.w500,
-                      color: !available ? dark500 : isSelected ? light : dark),
-                  )),
+                  child: Row(
+                    children: [
+                      Icon(p.$2, color: isSelected ? primary : dark500, size: 22),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              p.$3,
+                              style: TextStyle(
+                                fontFamily: 'HankenGrotesk',
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isSelected ? primary : dark,
+                              ),
+                            ),
+                            Text(p.$4, style: TStyle.small),
+                          ],
+                        ),
+                      ),
+                      if (isSelected) const Icon(Icons.check_circle_rounded, color: primary, size: 20),
+                    ],
+                  ),
                 );
               }),
             );
-          },
-        ),
-        const SizedBox(height: 16),
+          }),
+          const SizedBox(height: 16),
 
-        // Payment method
-        Text('Payment method', style: TStyle.h3),
-        const SizedBox(height: 8),
-        ...[
-          ('upi', Icons.account_balance_wallet_outlined, 'UPI', 'GPay, PhonePe, Paytm'),
-          ('card', Icons.credit_card_outlined, 'Card', 'Credit / Debit card'),
-          ('cash', Icons.money_outlined, 'Pay at clinic', 'Pay when you visit'),
-        ].map((p) {
-          return GestureDetector(
-            onTap: () => controller.selectPayment(p.$1),
-            child: Obx(() {
-              final isSelected = controller.selectedPayment.value == p.$1;
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  color: isSelected ? primary.withValues(alpha: .08) : light,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: isSelected ? primary : black200, width: isSelected ? 1.5 : 1),
+          // Summarized Confirmation & checkout actions
+          Obx(() {
+            if (controller.selectedSlot.value != null) {
+              return GlassCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Booking summary', style: TStyle.h3),
+                    const Divider(height: 16),
+                    _buildSummaryRow('Doctor', 'Dr. Priya Sharma'),
+                    _buildSummaryRow('Date', DateFormat('dd MMM yyyy').format(controller.selectedDate.value)),
+                    _buildSummaryRow('Time', controller.selectedSlot.value!),
+                    _buildSummaryRow('Type', controller.selectedType.value),
+                    _buildSummaryRow(
+                        'Payment',
+                        controller.selectedPayment.value == 'cash'
+                            ? 'Pay at clinic'
+                            : controller.selectedPayment.value.toUpperCase()),
+                    const Divider(height: 16),
+                    _buildSummaryRow('Consultation fee', '₹500', bold: true),
+                    const SizedBox(height: 16),
+                    PrimaryBtn(
+                      label: controller.selectedPayment.value == 'cash' ? 'Confirm Appointment' : 'Pay ₹500 & Book',
+                      loading: controller.booking.value,
+                      icon: controller.selectedPayment.value == 'cash' ? Icons.check_rounded : Icons.payment_rounded,
+                      onTap: () => controller.confirmBooking(parentContext, () => _showBookingSuccess(controller)),
+                    ),
+                  ],
                 ),
-                child: Row(children: [
-                  Icon(p.$2, color: isSelected ? primary : dark500, size: 22),
-                  const SizedBox(width: 12),
-                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(p.$3, style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 13, fontWeight: FontWeight.w600, color: isSelected ? primary : dark)),
-                    Text(p.$4, style: TStyle.small),
-                  ])),
-                  if (isSelected) const Icon(Icons.check_circle_rounded, color: primary, size: 20),
-                ]),
               );
-            }),
-          );
-        }),
-        const SizedBox(height: 16),
-
-        // Summary & Book button
-        Obx(() {
-          if (controller.selectedSlot.value != null) {
-            return GlassCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Booking summary', style: TStyle.h3),
-              const Divider(height: 16),
-              _summaryRow('Doctor', 'Dr. Priya Sharma'),
-              _summaryRow('Date', DateFormat('dd MMM yyyy').format(controller.selectedDate.value)),
-              _summaryRow('Time', controller.selectedSlot.value!),
-              _summaryRow('Type', controller.selectedType.value),
-              _summaryRow('Payment', controller.selectedPayment.value == 'cash' ? 'Pay at clinic' : controller.selectedPayment.value.toUpperCase()),
-              const Divider(height: 16),
-              _summaryRow('Consultation fee', '₹500', bold: true),
-              const SizedBox(height: 16),
-              PrimaryBtn(
-                label: controller.selectedPayment.value == 'cash' ? 'Confirm Appointment' : 'Pay ₹500 & Book',
-                loading: controller.booking.value,
-                icon: controller.selectedPayment.value == 'cash' ? Icons.check_rounded : Icons.payment_rounded,
-                onTap: () => controller.confirmBooking(context, () => _showBookingSuccess(controller)),
-              ),
-            ]));
-          }
-          return const SizedBox.shrink();
-        }),
-      ]),
+            }
+            return const SizedBox.shrink();
+          }),
+        ],
+      ),
     );
   }
 
-  Widget _summaryRow(String label, String value, {bool bold = false}) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(label, style: TStyle.bodyMuted),
-      Text(value, style: bold ? TStyle.h3 : TStyle.body),
-    ]),
-  );
+  Widget _buildSummaryRow(String label, String value, {bool bold = false}) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: TStyle.bodyMuted),
+            Text(value, style: bold ? TStyle.h3 : TStyle.body),
+          ],
+        ),
+      );
 
-  // ── Appointments history ──
-  Widget _historyTab() {
+  // Booking success pop up dialog
+  void _showBookingSuccess(AppointmentController controller) {
+    showDialog(
+      context: parentContext,
+      builder: (_) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: const BoxDecoration(color: Color(0xFFE8F5E9), shape: BoxShape.circle),
+              child: const Icon(Icons.check_circle_rounded, color: success, size: 40),
+            ),
+            const SizedBox(height: 16),
+            const Text('Appointment Booked!', style: TStyle.h2, textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            Text(
+              'Your appointment with Dr. Priya Sharma on ${DateFormat('dd MMM yyyy').format(controller.selectedDate.value)} at ${controller.selectedSlot.value} is confirmed.',
+              style: TStyle.bodyMuted,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            PrimaryBtn(
+              label: 'Done',
+              onTap: () {
+                Get.back();
+                Get.back();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Appointment History/List Tab Widget ──────────────────────────
+class AppointmentHistoryTabWidget extends StatelessWidget {
+  final BuildContext parentContext;
+
+  const AppointmentHistoryTabWidget({
+    super.key,
+    required this.parentContext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       itemCount: PatientData.appointments.length,
@@ -285,82 +613,196 @@ class _AppointmentScreenState extends State<AppointmentScreen> with SingleTicker
         final isUpcoming = a['status'] == 'Confirmed';
         return Padding(
           padding: const EdgeInsets.only(bottom: 14),
-          child: GlassCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              StatusBadge(
-                label: a['status']!,
-                bg: isUpcoming ? const Color(0xFFE8F5E9) : black300,
-                fg: isUpcoming ? success : dark500,
-              ),
-              Text(a['fee']!, style: TStyle.h3),
-            ]),
-            const SizedBox(height: 10),
-            Row(children: [
-              const Icon(Icons.calendar_today_rounded, size: 14, color: primary),
-              const SizedBox(width: 6),
-              Text('${a['date']}  •  ${a['time']}', style: TStyle.body),
-            ]),
-            const SizedBox(height: 4),
-            Row(children: [
-              const Icon(Icons.person_outline_rounded, size: 14, color: primary),
-              const SizedBox(width: 6),
-              Text(a['doctor']!, style: TStyle.body),
-            ]),
-            const SizedBox(height: 4),
-            Row(children: [
-              const Icon(Icons.medical_services_outlined, size: 14, color: primary),
-              const SizedBox(width: 6),
-              Text(a['type']!, style: TStyle.bodyMuted),
-            ]),
-            if (isUpcoming) ...[
-              const SizedBox(height: 12),
-              Row(children: [
-                Expanded(child: OutlinedButton.icon(
-                  onPressed: () => _showCancelDialog(),
-                  icon: const Icon(Icons.cancel_outlined, size: 16, color: errorCol),
-                  label: const Text('Cancel', style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 12, color: errorCol)),
-                  style: OutlinedButton.styleFrom(side: const BorderSide(color: errorCol), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                )),
-                const SizedBox(width: 10),
-                Expanded(child: ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.chat_outlined, size: 16),
-                  label: const Text('Message', style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 12)),
-                  style: ElevatedButton.styleFrom(backgroundColor: primary, foregroundColor: light, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                )),
-              ]),
-            ],
-          ])),
+          child: GlassCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    StatusBadge(
+                      label: a['status']!,
+                      bg: isUpcoming ? const Color(0xFFE8F5E9) : black300,
+                      fg: isUpcoming ? success : dark500,
+                    ),
+                    Text(a['fee']!, style: TStyle.h3),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    const Icon(Icons.calendar_today_rounded, size: 14, color: primary),
+                    const SizedBox(width: 6),
+                    Text('${a['date']}  •  ${a['time']}', style: TStyle.body),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.person_outline_rounded, size: 14, color: primary),
+                    const SizedBox(width: 6),
+                    Text(a['doctor']!, style: TStyle.body),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.medical_services_outlined, size: 14, color: primary),
+                    const SizedBox(width: 6),
+                    Text(a['type']!, style: TStyle.bodyMuted),
+                  ],
+                ),
+                if (isUpcoming) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _showCancelDialog(),
+                          icon: const Icon(Icons.cancel_outlined, size: 16, color: errorCol),
+                          label: const Text('Cancel',
+                              style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 12, color: errorCol)),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: errorCol),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.chat_outlined, size: 16),
+                          label: const Text('Message', style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 12)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primary,
+                            foregroundColor: light,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
         );
       },
     );
   }
 
-  void _showBookingSuccess(AppointmentController controller) {
-    showDialog(context: context, builder: (_) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      content: Column(mainAxisSize: MainAxisSize.min, children: [
-        Container(width: 64, height: 64, decoration: const BoxDecoration(color: Color(0xFFE8F5E9), shape: BoxShape.circle),
-          child: const Icon(Icons.check_circle_rounded, color: success, size: 40)),
-        const SizedBox(height: 16),
-        const Text('Appointment Booked!', style: TStyle.h2, textAlign: TextAlign.center),
-        const SizedBox(height: 8),
-        Text('Your appointment with Dr. Priya Sharma on ${DateFormat('dd MMM yyyy').format(controller.selectedDate.value)} at ${controller.selectedSlot.value} is confirmed.', style: TStyle.bodyMuted, textAlign: TextAlign.center),
-        const SizedBox(height: 20),
-        PrimaryBtn(label: 'Done', onTap: () { Get.back(); Get.back(); }),
-      ]),
-    ));
-  }
-
+  // Cancel booking alert confirmation
   void _showCancelDialog() {
-    showDialog(context: context, builder: (_) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: const Text('Cancel appointment?', style: TStyle.h3),
-      content: Text('Are you sure you want to cancel your appointment with Dr. Priya Sharma on 04 Jun 2025?', style: TStyle.bodyMuted),
-      actions: [
-        TextButton(onPressed: () => Get.back(), child: const Text('Keep', style: TextStyle(color: primary, fontFamily: 'HankenGrotesk'))),
-        TextButton(onPressed: () { Get.back(); }, child: const Text('Cancel Appointment', style: TextStyle(color: errorCol, fontFamily: 'HankenGrotesk'))),
-      ],
-    ));
+    showDialog(
+      context: parentContext,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Circular warning/busy calendar event badge
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: orange.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.event_busy_rounded,
+                    color: orange,
+                    size: 32,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Title styled with KronaOne typography
+              const Text(
+                'Cancel appointment?',
+                style: TextStyle(
+                  fontFamily: 'KronaOne',
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: dark,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Detailed confirmation instructions
+              const Text(
+                'Are you sure you want to cancel your appointment with Dr. Priya Sharma on 04 Jun 2025?',
+                style: TStyle.bodyMuted,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+
+              // Horizontal action controls
+              Row(
+                children: [
+                  // Confirm Cancel Action (styled as red outlined button)
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: errorCol),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text(
+                        'Cancel Appt',
+                        style: TextStyle(
+                          fontFamily: 'HankenGrotesk',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: errorCol,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Keep Appointment Action (styled as primary solid button)
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Get.back(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary,
+                        foregroundColor: light,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text(
+                        'Keep',
+                        style: TextStyle(
+                          fontFamily: 'HankenGrotesk',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: light,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

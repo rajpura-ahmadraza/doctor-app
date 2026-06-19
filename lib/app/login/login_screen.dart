@@ -1,14 +1,18 @@
+import 'package:clinixpro_patient/app/forgot%20password/forgot_password_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../utility/theme.dart';
-import 'forgot_password_screen.dart';
 import 'login_controller.dart';
 
+/// ── Login Screen ────────────────────────────────────────────────────────────
+/// Renders the patient authentication landing portal. Lays out a logo/branding
+/// header and the core login card with mobile/password fields.
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Inject and instantiate the LoginController
     final controller = Get.put(LoginController());
 
     return AppScaffold(
@@ -18,10 +22,15 @@ class LoginScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const HeaderWidget(),
+              // 1. Branding logo and Title header
+              const LoginHeaderWidget(),
               const SizedBox(height: 40),
-              ContentWidget(controller: controller),
+
+              // 2. Authentication inputs, biometric trigger, and password recovery triggers
+              LoginContentWidget(controller: controller),
               const SizedBox(height: 24),
+
+              // Footer version representation info
               const Text('Powered by ClinixPro • v1.0.0', style: TStyle.small),
               const SizedBox(height: 24),
             ],
@@ -32,8 +41,10 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-class HeaderWidget extends StatelessWidget {
-  const HeaderWidget({super.key});
+/// ── Login Header Widget ──────────────────────────────────────────────────────
+/// A branding header widget containing the portal logo icon, app name, and screen subtitle.
+class LoginHeaderWidget extends StatelessWidget {
+  const LoginHeaderWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +52,8 @@ class HeaderWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: 48),
-        // Logo
+
+        // Centered App logo badge with shadows
         Container(
           width: 72,
           height: 72,
@@ -69,6 +81,8 @@ class HeaderWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+
+        // App main name
         const Text(
           'ClinixPro',
           style: TextStyle(
@@ -84,10 +98,16 @@ class HeaderWidget extends StatelessWidget {
   }
 }
 
-class ContentWidget extends StatelessWidget {
+/// ── Login Content Widget ─────────────────────────────────────────────────────
+/// Form wrapper card housing text input controllers, biometric login triggers,
+/// and password reset routing actions.
+class LoginContentWidget extends StatelessWidget {
   final LoginController controller;
 
-  const ContentWidget({super.key, required this.controller});
+  const LoginContentWidget({
+    super.key,
+    required this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -100,6 +120,7 @@ class ContentWidget extends StatelessWidget {
           const Text('Sign in to access your health records', style: TStyle.bodyMuted),
           const SizedBox(height: 24),
 
+          // Mobile number entry field
           AppInput(
             label: 'Mobile number',
             hint: 'Enter your mobile number',
@@ -109,6 +130,7 @@ class ContentWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
+          // Password entry field (masked/unmasked dynamically)
           Obx(() => AppInput(
                 label: 'Password',
                 hint: 'Enter your password',
@@ -116,13 +138,17 @@ class ContentWidget extends StatelessWidget {
                 obscure: controller.obscure.value,
                 prefix: const Icon(Icons.lock_outline_rounded, size: 18, color: dark500),
                 suffix: IconButton(
-                  icon: Icon(controller.obscure.value ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                      size: 18, color: dark500),
+                  icon: Icon(
+                    controller.obscure.value ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    size: 18,
+                    color: dark500,
+                  ),
                   onPressed: controller.toggleObscure,
                 ),
               )),
           const SizedBox(height: 10),
 
+          // Forgot password trigger
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
@@ -132,37 +158,57 @@ class ContentWidget extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-              child: const Text('Forgot password?',
-                  style: TextStyle(fontFamily: 'HankenGrotesk', fontSize: 12, color: primary)),
+              child: const Text(
+                'Forgot password?',
+                style: TextStyle(
+                  fontFamily: 'HankenGrotesk',
+                  fontSize: 12,
+                  color: primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 20),
 
+          // Primary Sign In action button
           Obx(() => PrimaryBtn(
-              label: 'Sign In',
-              loading: controller.loading.value,
-              onTap: () => controller.login(context),
-              icon: Icons.login_rounded)),
+                label: 'Sign In',
+                loading: controller.loading.value,
+                onTap: () => controller.login(context),
+                icon: Icons.login_rounded,
+              )),
           const SizedBox(height: 16),
 
-          // Divider
-          Row(children: [
-            Expanded(child: Divider(color: dark.withValues(alpha: .1))),
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('or', style: TStyle.bodyMuted)),
-            Expanded(child: Divider(color: dark.withValues(alpha: .1))),
-          ]),
+          // Visual Divider
+          Row(
+            children: [
+              Expanded(child: Divider(color: dark.withValues(alpha: .1))),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Text('or', style: TStyle.bodyMuted),
+              ),
+              Expanded(child: Divider(color: dark.withValues(alpha: .1))),
+            ],
+          ),
           const SizedBox(height: 16),
 
-          // Fingerprint button
+          // Secondary Biometric fingerprint verification trigger
           SizedBox(
             width: double.infinity,
             height: 50,
             child: OutlinedButton.icon(
               onPressed: () => controller.loginWithBiometric(context),
               icon: const Icon(Icons.fingerprint, size: 22, color: primary),
-              label: const Text('Sign in with Fingerprint',
-                  style:
-                      TextStyle(fontFamily: 'HankenGrotesk', fontSize: 14, fontWeight: FontWeight.w500, color: dark)),
+              label: const Text(
+                'Sign in with Fingerprint',
+                style: TextStyle(
+                  fontFamily: 'HankenGrotesk',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: dark,
+                ),
+              ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: black200),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),

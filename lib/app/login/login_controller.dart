@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:local_auth/local_auth.dart';
 import '../utility/theme.dart';
-import '../shell/shell_screen.dart';
+import '../utility/auth_service.dart';
 
 class LoginController extends GetxController {
   final mobileCtrl = TextEditingController(text: '9876543210');
@@ -28,16 +28,19 @@ class LoginController extends GetxController {
     await Future.delayed(const Duration(milliseconds: 1200));
     loading.value = false;
 
-    Get.offAll(() => const ShellScreen());
+    AuthService.to.login();
+    Get.offAllNamed('/shell');
   }
 
   void loginWithBiometric(BuildContext context) async {
     try {
       final canCheck = await auth.canCheckBiometrics;
       if (!canCheck) {
-        showSnack(
-            context, 'Biometric authentication not available on this device',
-            isError: true);
+        if (context.mounted) {
+          showSnack(
+              context, 'Biometric authentication not available on this device',
+              isError: true);
+        }
         return;
       }
       final authenticated = await auth.authenticate(
@@ -46,12 +49,15 @@ class LoginController extends GetxController {
         persistAcrossBackgrounding: true,
       );
       if (authenticated) {
-        Get.offAll(() => const ShellScreen());
+        AuthService.to.login();
+        Get.offAllNamed('/shell');
       }
     } on PlatformException {
-      showSnack(
-          context, 'Biometric authentication failed. Please use password.',
-          isError: true);
+      if (context.mounted) {
+        showSnack(
+            context, 'Biometric authentication failed. Please use password.',
+            isError: true);
+      }
     }
   }
 
