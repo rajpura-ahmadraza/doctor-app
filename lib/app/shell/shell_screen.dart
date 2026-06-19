@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../utility/theme.dart';
+import '../utility/dialogs.dart';
 import '../home/home_screen.dart';
 import '../appointment/appointment_screen.dart';
 import '../chat/chat_screen.dart';
@@ -39,7 +39,7 @@ class ShellScreen extends StatelessWidget {
           controller.changeIndex(0);
         } else {
           // If we are already on the Home tab, show the exit app confirmation dialog
-          _showExitDialog(context);
+          AppDialogs.showExitDialog(context);
         }
       },
       child: Scaffold(
@@ -98,119 +98,6 @@ class ShellScreen extends StatelessWidget {
                     ],
                   )),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Beautiful custom exit application dialog
-  void _showExitDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Circular exit app warning badge
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: errorCol.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.power_settings_new_rounded,
-                    color: errorCol,
-                    size: 32,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Title styled with KronaOne typography
-              const Text(
-                'Exit App?',
-                style: TextStyle(
-                  fontFamily: 'KronaOne',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: dark,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Dialog description text
-              const Text(
-                'Are you sure you want to close and exit the ClinixPro application?',
-                style: TStyle.bodyMuted,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-
-              // Dual button action controls
-              Row(
-                children: [
-                  // Cancel Exit button
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Get.back(),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: black200),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(
-                          fontFamily: 'HankenGrotesk',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: dark,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-
-                  // Exit app confirmation button
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        SystemNavigator.pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: errorCol,
-                        foregroundColor: light,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        'Exit',
-                        style: TextStyle(
-                          fontFamily: 'HankenGrotesk',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: light,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
           ),
         ),
       ),

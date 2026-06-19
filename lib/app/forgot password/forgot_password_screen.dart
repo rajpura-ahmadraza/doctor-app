@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../utility/theme.dart';
+import '../utility/dialogs.dart';
 import 'forgot_password_controller.dart';
 
 // ── Forgot Password Screen ──────────────────────────────────────
@@ -337,53 +338,7 @@ class ForgotPasswordContentWidget extends StatelessWidget {
 
   // Alert dialog prompt on successful password reset
   void _showSuccess(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: const BoxDecoration(
-                color: Color(0xFFE8F5E9),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_circle_rounded,
-                color: success,
-                size: 44,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Password Reset!',
-              style: TStyle.h2,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Your password has been successfully updated. You can now log in to your account.',
-              style: TStyle.bodyMuted,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            PrimaryBtn(
-              label: 'Proceed to Login',
-              onTap: () {
-                Get.offAllNamed('/login');
-              },
-              icon: Icons.login_rounded,
-            ),
-          ],
-        ),
-      ),
-    );
+    AppDialogs.showPasswordResetSuccessDialog(context);
   }
 }
 

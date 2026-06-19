@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import '../utility/model/sample_data.dart';
 import '../utility/theme.dart';
+import '../utility/dialogs.dart';
 import 'appointment_controller.dart';
 
 class AppointmentScreen extends StatefulWidget {
@@ -556,40 +557,10 @@ class AppointmentBookingTabWidget extends StatelessWidget {
 
   // Booking success pop up dialog
   void _showBookingSuccess(AppointmentController controller) {
-    showDialog(
-      context: parentContext,
-      builder: (_) => AlertDialog(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: const BoxDecoration(color: Color(0xFFE8F5E9), shape: BoxShape.circle),
-              child: const Icon(Icons.check_circle_rounded, color: success, size: 40),
-            ),
-            const SizedBox(height: 16),
-            const Text('Appointment Booked!', style: TStyle.h2, textAlign: TextAlign.center),
-            const SizedBox(height: 8),
-            Text(
-              'Your appointment with Dr. Priya Sharma on ${DateFormat('dd MMM yyyy').format(controller.selectedDate.value)} at ${controller.selectedSlot.value} is confirmed.',
-              style: TStyle.bodyMuted,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            PrimaryBtn(
-              label: 'Done',
-              onTap: () {
-                Get.back();
-                Get.back();
-              },
-            ),
-          ],
-        ),
-      ),
+    AppDialogs.showBookingSuccessDialog(
+      parentContext,
+      controller.selectedDate.value,
+      controller.selectedSlot.value ?? '',
     );
   }
 }
@@ -695,114 +666,6 @@ class AppointmentHistoryTabWidget extends StatelessWidget {
 
   // Cancel booking alert confirmation
   void _showCancelDialog() {
-    showDialog(
-      context: parentContext,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Circular warning/busy calendar event badge
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: orange.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.event_busy_rounded,
-                    color: orange,
-                    size: 32,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Title styled with KronaOne typography
-              const Text(
-                'Cancel appointment?',
-                style: TextStyle(
-                  fontFamily: 'KronaOne',
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: dark,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Detailed confirmation instructions
-              const Text(
-                'Are you sure you want to cancel your appointment with Dr. Priya Sharma on 04 Jun 2025?',
-                style: TStyle.bodyMuted,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-
-              // Horizontal action controls
-              Row(
-                children: [
-                  // Confirm Cancel Action (styled as red outlined button)
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: errorCol),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        'Cancel Appt',
-                        style: TextStyle(
-                          fontFamily: 'HankenGrotesk',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: errorCol,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-
-                  // Keep Appointment Action (styled as primary solid button)
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Get.back(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary,
-                        foregroundColor: light,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        'Keep',
-                        style: TextStyle(
-                          fontFamily: 'HankenGrotesk',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: light,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    AppDialogs.showCancelDialog(parentContext, '04 Jun 2025');
   }
 }
